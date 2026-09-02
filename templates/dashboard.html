@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Patient Dashboard - CarePlus Hospital</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f9fc;
+        color: #222;
+    }
+
+    nav {
+        height: 70px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 7%;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .logo {
+        font-size: 25px;
+        font-weight: bold;
+        color: #087ea4;
+    }
+
+    .logo span {
+        color: #16a085;
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        color: #333;
+        margin-left: 25px;
+    }
+
+    .logout {
+        background: #087ea4;
+        color: white !important;
+        padding: 10px 18px;
+        border-radius: 6px;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 1100px;
+        margin: 50px auto;
+    }
+
+    .welcome {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+
+    .welcome h1 {
+        color: #123b4a;
+        margin-bottom: 10px;
+    }
+
+    .welcome p {
+        color: #666;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+
+    .card {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+        color: #123b4a;
+        margin-bottom: 20px;
+    }
+
+    .info {
+        margin-bottom: 15px;
+        color: #555;
+    }
+
+    .info strong {
+        color: #123b4a;
+    }
+
+    .appointment-btn {
+        display: inline-block;
+        text-decoration: none;
+        background: #087ea4;
+        color: white;
+        padding: 13px 25px;
+        border-radius: 7px;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .appointment-btn:hover {
+        background: #06657f;
+    }
+
+    .appointments-section {
+        margin-top: 30px;
+    }
+
+    .doctor-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .doctor-card {
+        border: 1px solid #e0e6ea;
+        border-radius: 8px;
+        padding: 18px;
+        background: #fafcfd;
+    }
+
+    .doctor-card h3 {
+        color: #087ea4;
+        margin-bottom: 10px;
+    }
+
+    .doctor-card p {
+        color: #555;
+        margin-bottom: 14px;
+    }
+
+    .book-small {
+        display: inline-block;
+        padding: 9px 14px;
+        border-radius: 6px;
+        color: white;
+        background: #087ea4;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .cancel-btn {
+        margin-top: 12px;
+        padding: 9px 14px;
+        border: 0;
+        border-radius: 6px;
+        background: #dc3545;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .appointment-card {
+        border: 1px solid #e0e6ea;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        background: #fafcfd;
+    }
+
+    .appointment-card h3 {
+        color: #087ea4;
+        margin-bottom: 12px;
+    }
+
+    .appointment-card p {
+        color: #555;
+        margin: 8px 0;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 5px;
+        background: #fff3cd;
+        color: #856404;
+        font-weight: bold;
+    }
+
+    .status-confirmed {
+        background: #cfe2ff;
+        color: #084298;
+    }
+
+    .status-completed {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    .no-appointments {
+        color: #777;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .nav-links a {
+            margin-left: 10px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+{% if messages %}
+    {% for message in messages %}
+        <p>{{ message }}</p>
+    {% endfor %}
+{% endif %}
+
+<nav>
+
+    <div class="logo">
+        Care<span>Plus</span>
+    </div>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/doctors/">Doctors</a>
+        <a href="/logout/" class="logout">Logout</a>
+    </div>
+
+</nav>
+
+
+<div class="container">
+
+    <div class="welcome">
+
+        <h1>
+            Welcome, {{ patient.name }} <small>(Patient)</small>! 👋
+        </h1>
+
+        <p>
+            Welcome to your CarePlus patient dashboard.
+        </p>
+
+    </div>
+
+
+    <div class="dashboard-grid">
+
+        <!-- Patient Information -->
+
+        <div class="card">
+
+            <h2>Patient Information</h2>
+
+            <p class="info">
+                <strong>Name:</strong>
+                {{ patient.name }}
+            </p>
+
+            <p class="info">
+                <strong>Age:</strong>
+                {{ patient.age }}
+            </p>
+
+            <p class="info">
+                <strong>Gender:</strong>
+                {{ patient.gender }}
+            </p>
+
+            <p class="info">
+                <strong>Phone:</strong>
+                {{ patient.phone }}
+            </p>
+
+            <p class="info">
+                <strong>Email:</strong>
+                {{ patient.email }}
+            </p>
+
+            <p class="info">
+                <strong>Address:</strong>
+                {{ patient.address }}
+            </p>
+
+        </div>
+
+
+        <!-- Book Appointment -->
+
+        <div class="card">
+
+            <h2>Book an Appointment</h2>
+
+            <p class="info">
+                Need to see a doctor? Browse our doctors
+                and book an appointment.
+            </p>
+
+            <a href="/doctors/" class="appointment-btn">
+                Find a Doctor
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="card appointments-section">
+        <h2>Available Doctors</h2>
+        <p class="info">Choose a doctor to request a new appointment.</p>
+
+        <div class="doctor-list">
+            {% for doctor in doctors %}
+                <div class="doctor-card">
+                    <h3>Dr. {{ doctor.name }}</h3>
+                    <p>{{ doctor.specialization }}<br>{{ doctor.experience }} years of experience</p>
+                    <a href="{% url 'book_appointment' doctor.id %}" class="book-small">Book appointment</a>
+                </div>
+            {% empty %}
+                <p class="no-appointments">No doctors are currently available.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <!-- My Appointments -->
+
+    <div class="card appointments-section">
+
+        <h2>My Appointments</h2>
+
+
+        {% for appointment in appointments %}
+
+            <div class="appointment-card">
+
+                <h3>
+                    Dr. {{ appointment.doctor.name }}
+                </h3>
+
+                <p>
+                    <strong>Specialization:</strong>
+                    {{ appointment.doctor.specialization }}
+                </p>
+
+                <p>
+                    <strong>Date:</strong>
+                    {{ appointment.appointment_date }}
+                </p>
+
+                <p>
+                    <strong>Time:</strong>
+                    {{ appointment.appointment_time }}
+                </p>
+
+                <p>
+                    <strong>Reason:</strong>
+                    {{ appointment.reason }}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    <span class="status {% if appointment.status == 'Confirmed' %}status-confirmed{% elif appointment.status == 'Completed' %}status-completed{% elif appointment.status == 'Rejected' or appointment.status == 'Cancelled' %}status-cancelled{% endif %}">
+                        {{ appointment.status }}
+                    </span>
+                </p>
+
+                {% if appointment.status == 'Pending' or appointment.status == 'Confirmed' %}
+                    <form method="post" action="{% url 'cancel_patient_appointment' appointment.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="cancel-btn">Cancel Appointment</button>
+                    </form>
+                {% endif %}
+
+            </div>
+
+        {% empty %}
+
+            <p class="no-appointments">
+                You don't have any appointments yet.
+            </p>
+
+            <a href="/doctors/" class="appointment-btn">
+                Book Your First Appointment
+            </a>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+</body>
+</html>

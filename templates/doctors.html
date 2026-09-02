@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Our Doctors - CarePlus Hospital</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f9fc;
+        color: #222;
+    }
+
+    nav {
+        height: 70px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 7%;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .logo {
+        font-size: 25px;
+        font-weight: bold;
+        color: #087ea4;
+    }
+
+    .logo span {
+        color: #16a085;
+    }
+
+    nav a {
+        text-decoration: none;
+        color: #333;
+        margin-left: 25px;
+        font-weight: 500;
+    }
+
+    nav a:hover {
+        color: #087ea4;
+    }
+
+    .container {
+        padding: 60px 7%;
+        text-align: center;
+    }
+
+    h1 {
+        color: #123b4a;
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        color: #666;
+        margin-bottom: 40px;
+    }
+
+    .doctor-container {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        flex-wrap: wrap;
+    }
+
+    .doctor-card {
+        width: 280px;
+        background: white;
+        padding: 30px 20px;
+        border-radius: 12px;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        transition: 0.3s;
+    }
+
+    .doctor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+
+    .doctor-icon {
+        font-size: 55px;
+        margin-bottom: 15px;
+    }
+
+    .doctor-card h2 {
+        color: #123b4a;
+        margin-bottom: 10px;
+    }
+
+    .specialization {
+        color: #087ea4;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .doctor-card p {
+        color: #666;
+        margin: 8px 0;
+    }
+
+    .available {
+        color: green !important;
+        font-weight: bold;
+    }
+
+    .unavailable {
+        color: red !important;
+        font-weight: bold;
+    }
+
+    .book-btn {
+        display: inline-block;
+        margin-top: 18px;
+        padding: 11px 20px;
+        background: #087ea4;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .book-btn:hover {
+        background: #065f7c;
+    }
+
+    .disabled-btn {
+        display: inline-block;
+        margin-top: 18px;
+        padding: 11px 20px;
+        background: #ccc;
+        color: #666;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- Navigation Bar -->
+<nav>
+
+    <div class="logo">
+        Care<span>Plus</span>
+    </div>
+
+    <div>
+        <a href="/">Home</a>
+        <a href="/doctors/">Doctors</a>
+    </div>
+
+</nav>
+
+
+<!-- Doctors Section -->
+<div class="container">
+
+    <h1>Our Doctors</h1>
+
+    <p class="subtitle">
+        Meet our experienced healthcare professionals.
+    </p>
+
+
+    <div class="doctor-container">
+
+        {% for doctor in doctors %}
+
+            <div class="doctor-card">
+
+                <div class="doctor-icon">
+                    👨‍⚕️
+                </div>
+
+                <h2>
+                    Dr. {{ doctor.name }}
+                </h2>
+
+                <p class="specialization">
+                    {{ doctor.specialization }}
+                </p>
+
+                <p>
+                    <strong>Experience:</strong>
+                    {{ doctor.experience }} years
+                </p>
+
+                <p>
+                    <strong>Phone:</strong>
+                    {{ doctor.phone }}
+                </p>
+
+
+                {% if doctor.available %}
+
+                    <p class="available">
+                        ● Available
+                    </p>
+
+                    <a
+                        href="{% url 'book_appointment' doctor.id %}"
+                        class="book-btn"
+                    >
+                        Book Appointment
+                    </a>
+
+                {% else %}
+
+                    <p class="unavailable">
+                        ● Not Available
+                    </p>
+
+                    <span class="disabled-btn">
+                        Currently Unavailable
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        {% empty %}
+
+            <p>
+                No doctors available at the moment.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+</body>
+</html>
