@@ -29,8 +29,11 @@ def doctor_list(request):
 
 def doctor_login(request):
     if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+
+        if not email or not password:
+            return render(request, 'doctor_login.html', {'error': 'Email and password are required'})
 
         user = authenticate(
             request,
