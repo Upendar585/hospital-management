@@ -1,10 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
 
+from . import views
 from .views import health, home
 from users.views import patient_dashboard
 
 urlpatterns = [
+    path('admin/login/', views.admin_login, name='admin_login'),
     path('admin/', admin.site.urls),
 
     path('', home, name='home'),
