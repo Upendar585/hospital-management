@@ -10,8 +10,11 @@ def home(request):
 
 def admin_login(request):
     if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+
+        if not email or not password:
+            return render(request, 'admin_login.html', {'error': 'Email and password are required'})
 
         user = authenticate(
             request,
