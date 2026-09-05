@@ -5,6 +5,8 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.db import transaction
 
 from .models import Doctor
 
@@ -35,23 +37,46 @@ def doctor_login(request):
         if not email or not password:
             return render(request, 'doctor_login.html', {'error': 'Email and password are required'})
 
-        user = authenticate(
-            request,
-            username=email,
-            password=password
-        )
+        # The Django admin can create a user with any username.  The doctor
+        # login form, however, deliberately uses the doctor's email address.
+        # Look up that user first, then authenticate with the stored username.
+        # This also keeps accounts created before this change working.
+        user_account = User.objects.filter(email__iexact=email).first()
+        username = user_account.username if user_account else email
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            try:
-                doctor = Doctor.objects.get(user=user)
+            doctor = Doctor.objects.filter(user=user).first()
+
+            # A user and doctor profile are often created separately in the
+            # admin.  If their email addresses match, safely complete the
+            # missing one-to-one link the first time the doctor logs in.
+            if doctor is None and user.email:
+                with transaction.atomic():
+                    doctor = (
+                        Doctor.objects.select_for_update()
+                        .filter(user__isnull=True, email__iexact=user.email)
+                        .first()
+                    )
+                    if doctor is not None:
+                        doctor.user = user
+                        doctor.save(update_fields=['user'])
+
+            if doctor is not None:
                 login(request, user)
                 return redirect('doctor_dashboard')
-            except Doctor.DoesNotExist:
-                return render(
-                    request,
-                    'doctor_login.html',
-                    {'error': 'This account is not registered as a doctor.'}
-                )
+
+            return render(
+                request,
+                'doctor_login.html',
+                {
+                    'error': (
+                        'This account is not linked to a doctor profile. '
+                        'Ask an administrator to create the doctor profile '
+                        'and assign this user.'
+                    )
+                }
+            )
 
         return render(
             request,
