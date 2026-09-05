@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .models import Patient
 from doctors.models import Doctor
@@ -44,12 +45,23 @@ def register_patient(request):
 
 
 def patient_login(request):
+    next_url = request.POST.get('next') or request.GET.get('next', '')
+    if not url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        next_url = ''
+
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '')
 
         if not email or not password:
-            return render(request, 'login.html', {'error': 'Email and password are required'})
+            return render(request, 'login.html', {
+                'error': 'Email and password are required',
+                'next': next_url,
+            })
 
         user = authenticate(
             request,
@@ -59,17 +71,22 @@ def patient_login(request):
 
         if user is not None:
             if not Patient.objects.filter(user=user).exists():
-                return render(request, 'login.html', {'error': 'Please use the doctor login for this account.'})
+                return render(request, 'login.html', {
+                    'error': 'Please use the doctor login for this account.',
+                    'next': next_url,
+                })
             login(request, user)
+            if next_url:
+                return redirect(next_url)
             return redirect('/dashboard/')
 
         return render(
             request,
             'login.html',
-            {'error': 'Invalid email or password'}
+            {'error': 'Invalid email or password', 'next': next_url}
         )
 
-    return render(request, 'login.html')
+    return render(request, 'login.html', {'next': next_url})
 
 
 @login_required(login_url='login')

@@ -1,16 +1,22 @@
 from datetime import datetime
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, render, redirect
-from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 
 from .models import Appointment
 from doctors.models import Doctor
 from users.models import Patient
 
 
-@login_required
 def book_appointment(request, doctor_id):
+
+    # Booking is for patients, but visitors should first be offered all three
+    # role-specific login choices instead of being sent to the doctor login.
+    if not request.user.is_authenticated:
+        login_choice_url = f"{reverse('home')}?{urlencode({'next': request.get_full_path()})}#choose-role"
+        return redirect(login_choice_url)
 
     doctor = get_object_or_404(Doctor, id=doctor_id, available=True)
     patient = Patient.objects.filter(user=request.user).first()

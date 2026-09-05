@@ -57,7 +57,7 @@
                             <div class="role-icon">P</div>
                             <h3 class="h4">Patient</h3>
                             <p class="text-secondary">Book appointments and see your appointment history.</p>
-                            <a class="btn btn-care mt-auto" href="{% url 'login' %}">Patient login</a>
+                            <a class="btn btn-care mt-auto" href="{% url 'login' %}?next={{ request.GET.next|urlencode }}">Patient login</a>
                             <a class="small mt-3" href="{% url 'register' %}">New patient? Register</a>
                         </article>
                     </div>
